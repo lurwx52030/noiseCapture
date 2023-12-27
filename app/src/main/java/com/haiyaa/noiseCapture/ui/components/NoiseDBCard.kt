@@ -17,6 +17,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -34,12 +35,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @Composable
-fun NoiseDBCard(snackbarHostState: SnackbarHostState? =null) {
+fun NoiseDBCard(db: MutableState<Double>?=null, snackbarHostState: SnackbarHostState? =null) {
     val context = LocalContext.current
-
-    val db = remember {
-        mutableStateOf(0.0)
-    }
 
     val recordAudioPermissions = arrayOf(
         Manifest.permission.RECORD_AUDIO
@@ -60,10 +57,10 @@ fun NoiseDBCard(snackbarHostState: SnackbarHostState? =null) {
 
 
     val recorder by lazy {
-        NoiseDBRecorder(context, db)
+        NoiseDBRecorder(context, db!!)
     }
 
-    val recording = remember {
+    val isRecording = remember {
         mutableStateOf(false)
     }
 
@@ -73,6 +70,7 @@ fun NoiseDBCard(snackbarHostState: SnackbarHostState? =null) {
         ),
         modifier = Modifier
             .fillMaxWidth()
+            .padding(0.dp,0.dp,0.dp,10.dp)
             .height(170.dp)
     ) {
         Text(
@@ -83,7 +81,7 @@ fun NoiseDBCard(snackbarHostState: SnackbarHostState? =null) {
 
         Row(modifier = Modifier.fillMaxWidth()) {
             Text(
-                text = "${"%.2f".format(db.value)} db",
+                text = "${"%.2f".format(db!!.value)} db",
                 fontSize = 50.sp,
                 modifier = Modifier
                     .weight(1f)
@@ -97,7 +95,7 @@ fun NoiseDBCard(snackbarHostState: SnackbarHostState? =null) {
                     .align(Alignment.CenterVertically)
             ) {
                 Button(onClick = {
-                    recording.value = true
+                    isRecording.value = true
 
                     when (PackageManager.PERMISSION_GRANTED) {
                         ContextCompat.checkSelfPermission(
@@ -114,19 +112,19 @@ fun NoiseDBCard(snackbarHostState: SnackbarHostState? =null) {
                             recordAudioPermissionLauncher.launch(recordAudioPermissions)
                         }
                     }
-                }, enabled = !recording.value) {
+                }, enabled = !isRecording.value) {
                     Text(text = "開始偵測")
                 }
                 Button(
                     onClick = {
-                        recording.value = false
+                        isRecording.value = false
 
                         recorder.stop()
                         CoroutineScope(Dispatchers.IO).launch {
                             snackbarHostState!!.showSnackbar(message = "偵測結束...")
                         }
                     },
-                    enabled = recording.value
+                    enabled = isRecording.value
                 ) {
                     Text(text = "結束偵測")
                 }
