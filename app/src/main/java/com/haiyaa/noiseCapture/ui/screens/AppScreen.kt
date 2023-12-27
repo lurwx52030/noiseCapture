@@ -12,10 +12,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.haiyaa.noiseCapture.ui.components.MqttServiceCard
 import com.haiyaa.noiseCapture.ui.components.NoiseDBCard
 import com.haiyaa.noiseCapture.ui.theme.NoiseCaptureTheme
 
@@ -23,6 +25,10 @@ import com.haiyaa.noiseCapture.ui.theme.NoiseCaptureTheme
 @Composable
 fun App() {
     val snackbarHostState = remember { SnackbarHostState() }
+
+    val db = remember {
+        mutableStateOf(0.0)
+    }
 
     Scaffold(
         topBar = {
@@ -41,7 +47,8 @@ fun App() {
                 .padding(it)
                 .padding(20.dp)
         ) {
-            NoiseDBCard(snackbarHostState)
+            NoiseDBCard(db, snackbarHostState)
+            MqttServiceCard(db, snackbarHostState)
         }
     }
 }
