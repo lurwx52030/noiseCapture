@@ -131,6 +131,7 @@ fun MqttServiceCard(
                     onClick = {
                         NoiseMQTTPublisher.disconnect()
                         isConnected.value = false
+                        isAutoPublishing.value = false
                     },
                     enabled = isConnected.value
                 ) {
@@ -156,6 +157,7 @@ fun MqttServiceCard(
                                     snackbarHostState!!.showSnackbar(message = "開始自動把分貝傳回broker...")
                                 }
                             } else {
+                                isAutoPublishing.value = false
                                 CoroutineScope(Dispatchers.IO).launch {
                                     snackbarHostState!!.showSnackbar(message = "尚未連線...")
                                 }
@@ -167,7 +169,7 @@ fun MqttServiceCard(
                             }
                         }
                     },
-                    enabled = !isAutoPublishing.value
+                    enabled = !isAutoPublishing.value && isConnected.value
                 ) {
                     Text(text = "開始自動Publish")
                 }

@@ -47,7 +47,7 @@ class NoiseMQTTPublisher(
     private var client: MqttClient? = null
 
     val isConnected: Boolean
-        get() = client == null
+        get() = client != null
 
     private val callback: MqttCallback = object : MqttCallback {
         override fun disconnected(disconnectResponse: MqttDisconnectResponse) {
