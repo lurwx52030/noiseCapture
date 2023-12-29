@@ -133,22 +133,6 @@ fun NoiseDBCard(db: MutableState<Double>?=null, snackbarHostState: SnackbarHostS
     }
 }
 
-fun startMeasure() {
-    val mediaRecorder = MediaRecorder().apply {
-        setAudioSource(MediaRecorder.AudioSource.MIC)
-        setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
-        setOutputFile("/dev/null")
-        setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
-    }
-
-    try {
-        mediaRecorder.prepare()
-        mediaRecorder.start()
-    } catch (e: Exception) {
-        e.printStackTrace()
-    }
-}
-
 @Preview(showBackground = true)
 @Composable
 fun NoiseDBCardPreview() {
