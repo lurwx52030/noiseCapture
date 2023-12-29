@@ -1,5 +1,6 @@
 package com.haiyaa.noiseCapture.ui.components
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -115,10 +116,6 @@ fun MqttServiceCard(
                             NoiseMQTTPublisher.connect(uri)
 
                             isConnected.value = true
-
-                            CoroutineScope(Dispatchers.IO).launch {
-                                snackbarHostState!!.showSnackbar(message = "連接成功...")
-                            }
                         } catch (e: Exception) {
                             CoroutineScope(Dispatchers.IO).launch {
                                 snackbarHostState!!.showSnackbar(message = "連接失敗，請檢查broker的ip address與port...")
@@ -151,10 +148,23 @@ fun MqttServiceCard(
                 Button(
                     modifier = Modifier.size(160.dp, 45.dp),
                     onClick = {
-                        NoiseMQTTPublisher.start()
-                        isAutoPublishing.value = true
-                        CoroutineScope(Dispatchers.IO).launch {
-                            snackbarHostState!!.showSnackbar(message = "開始自動把分貝傳回broker...")
+                        try {
+                            if (NoiseMQTTPublisher.isConnected) {
+                                NoiseMQTTPublisher.start()
+                                isAutoPublishing.value = true
+                                CoroutineScope(Dispatchers.IO).launch {
+                                    snackbarHostState!!.showSnackbar(message = "開始自動把分貝傳回broker...")
+                                }
+                            } else {
+                                CoroutineScope(Dispatchers.IO).launch {
+                                    snackbarHostState!!.showSnackbar(message = "尚未連線...")
+                                }
+                            }
+                        } catch (e: Exception) {
+                            Log.d("6", e.toString())
+                            CoroutineScope(Dispatchers.IO).launch {
+                                snackbarHostState!!.showSnackbar(message = "發生錯誤，以致不能自動把分貝傳回broker...")
+                            }
                         }
                     },
                     enabled = !isAutoPublishing.value
@@ -164,10 +174,23 @@ fun MqttServiceCard(
                 Button(
                     modifier = Modifier.size(160.dp, 45.dp),
                     onClick = {
-                        NoiseMQTTPublisher.end()
-                        isAutoPublishing.value = false
-                        CoroutineScope(Dispatchers.IO).launch {
-                            snackbarHostState!!.showSnackbar(message = "停止自動把分貝傳回broker...")
+                        try {
+                            if (NoiseMQTTPublisher.isConnected) {
+                                NoiseMQTTPublisher.end()
+                                isAutoPublishing.value = false
+                                CoroutineScope(Dispatchers.IO).launch {
+                                    snackbarHostState!!.showSnackbar(message = "停止自動把分貝傳回broker...")
+                                }
+                            } else {
+                                CoroutineScope(Dispatchers.IO).launch {
+                                    snackbarHostState!!.showSnackbar(message = "尚未連線...")
+                                }
+                            }
+                        } catch (e: Exception) {
+                            Log.d("6", e.toString())
+                            CoroutineScope(Dispatchers.IO).launch {
+                                snackbarHostState!!.showSnackbar(message = "發生錯誤，以致停止自動把分貝傳回broker...")
+                            }
                         }
                     },
                     enabled = isAutoPublishing.value

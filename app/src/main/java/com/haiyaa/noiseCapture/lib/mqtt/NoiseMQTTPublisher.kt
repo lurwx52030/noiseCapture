@@ -44,7 +44,10 @@ class NoiseMQTTPublisher(
 
     }
 
-    private lateinit var client: MqttClient
+    private var client: MqttClient? = null
+
+    val isConnected: Boolean
+        get() = client == null
 
     private val callback: MqttCallback = object : MqttCallback {
         override fun disconnected(disconnectResponse: MqttDisconnectResponse) {
@@ -88,51 +91,57 @@ class NoiseMQTTPublisher(
         try {
             val client_id = "Android Noise" + System.currentTimeMillis()
             client = MqttClient(broker, client_id, persistence)
-            client.setCallback(callback)
+            client!!.setCallback(callback)
             val connOpts = MqttConnectionOptions()
             connOpts.isCleanStart = true
             connOpts.isAutomaticReconnect = true
             connOpts.connectionTimeout = 30
             connOpts.keepAliveInterval = 20
             Log.i(TAG, "Connecting to broker: $broker")
-            client.connect(connOpts)
+            client!!.connect(connOpts)
         } catch (e: Exception) {
             Log.e(TAG, e.toString())
+            throw e
         }
     }
 
     override fun subscribe(topic: String, qos: Int) {
         try {
             Log.d(TAG, "topic=${topic}, qos=${qos}")
-            client.subscribe(topic, qos)
+            client?.subscribe(topic, qos)
         } catch (e: MqttException) {
             Log.e(TAG, topic + "subscribeFailed！" + e.message)
+            throw e
         }
     }
 
     override fun unsubscribe(topic: String) {
         try {
             Log.d(TAG, "topic=${topic}")
-            client.unsubscribe(topic)
+            client?.unsubscribe(topic)
         } catch (e: MqttException) {
             Log.e(TAG, topic + "unSubscribeFailed！" + e.message)
+            throw e
         }
     }
 
     override fun publish(topic: String, msg: String, qos: Int, retained: Boolean) {
         try {
-            client.publish(topic, msg.toByteArray(), 2, false)
+            client?.publish(topic, msg.toByteArray(), 2, false)
             Log.i(TAG, "$topic:$msg")
         } catch (e: MqttException) {
             Log.e(TAG, topic + "publishFailed" + e.message)
+            throw e
         }
     }
 
     override fun disconnect() {
         try {
-            client.disconnect();
+            client?.disconnect()
+            client = null
         } catch (e: MqttException) {
             Log.e(TAG, "disconnect failed:" + e.message)
+            throw e
         }
     }
 
@@ -141,6 +150,7 @@ class NoiseMQTTPublisher(
             handlerPublish.post(taskPublish)
         } catch (e: Exception) {
             Log.e(TAG, e.message!!)
+            throw e
         }
 
     }
@@ -150,6 +160,7 @@ class NoiseMQTTPublisher(
             handlerPublish.removeCallbacks(taskPublish)
         } catch (e: Exception) {
             Log.e(TAG, e.message!!)
+            throw e
         }
     }
 
